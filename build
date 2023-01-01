@@ -26,7 +26,7 @@ app_dir = f"{app_name}.AppDir"
 build_folder="build_folder"
 build_system = "Ninja"
 
-clean_build = True
+clean_build = False
 
 
 
