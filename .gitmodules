@@ -1,0 +1,27 @@
+[submodule "libs/assimp"]
+	path = libs/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "libs/glfw"]
+	path = libs/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "libs/glm"]
+	path = libs/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "libs/hwinfo"]
+	path = libs/hwinfo
+	url = https://github.com/lfreist/hwinfo.git
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "libs/jsoncpp"]
+	path = libs/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git
+[submodule "libs/libsndfile"]
+	path = libs/libsndfile
+	url = https://github.com/libsndfile/libsndfile.git
+[submodule "libs/Lua"]
+	path = libs/Lua
+	url = https://github.com/walterschell/Lua.git
+[submodule "libs/openal-soft"]
+	path = libs/openal-soft
+	url = https://github.com/kcat/openal-soft.git
