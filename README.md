@@ -8,6 +8,7 @@ It currently works on GNU/Linux, and possibly works on MacOS and Windows, but no
 If you are on GNU/Linux, make sure you have the following dependencies installed:
 - build-essential
 - ninja-build (recommended)
+- libogg-dev
 - xorg-dev
 - libfuse2
 - cmake
