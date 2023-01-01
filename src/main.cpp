@@ -262,7 +262,6 @@ void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
 }
 
 void ProcessInput(GLFWwindow* pWindow) {
-
   bool zoom =glfwGetKey(pWindow, GLFW_KEY_C);
 
   camera.zoom_ = (zoom) ? 30 : kZoom;
@@ -323,7 +322,8 @@ void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu) {
 
   debug_menu.Render(text_pos, pos, fps);
 }
-void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io, HelpMenu& help_menu) {
+void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io,
+                  HelpMenu& help_menu) {
   UpdateDelta();
   ClearScreen(0.0f, 0.0f, 0.0f);
 
@@ -345,7 +345,8 @@ void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io, HelpMenu& help_menu) {
   glfwSwapBuffers(pWindow);
   glfwPollEvents();
 }
-void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager, Shader& model_shader) {
+void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager,
+                Shader& model_shader) {
   static float rot = 0.0f;
   model_shader.Use();
 

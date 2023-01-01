@@ -31,7 +31,10 @@ LoadingScreen::LoadingScreen(GLFWwindow* pWindow, std::string path) {
   path_ = path;
 }
 
-void LoadingScreen::Render(GLFWimage* image, ImGuiIO& imgui_io, bool& loading_ready, bool& loading_finished, const int kScrWidth, const int kScrHeight, std::string message) {
+void LoadingScreen::Render(GLFWimage* image, ImGuiIO& imgui_io,
+                           bool& loading_ready, bool& loading_finished,
+                           const int kScrWidth, const int kScrHeight,
+                           std::string message) {
   for (int i = 0; i < 2; i++) {
     glfwSetInputMode(pWindow_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     ClearScreen(0.1f, 0.15f, 0.15f);

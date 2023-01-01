@@ -15,25 +15,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef LOADING_SCREEN_H
-#define LOADING_SCREEN_H
+#ifndef PARSE_JSON_H
+#define PARSE_JSON_H
 
 #include <string>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <imgui.h>
+#include <json/json.h>
 
-class LoadingScreen{
-  public:
-    LoadingScreen(GLFWwindow* pWindow, std::string path);
-
-    void Render(GLFWimage* image, ImGuiIO& imgui_io, bool& loading_ready,
-                bool& loading_finished, const int kScrWidth,
-                const int kScrHeight, std::string message);
-  private:
-    GLFWwindow* pWindow_;
-    std::string path_;
-};
+Json::Value ReadJsonFile(std::string path);
 
 #endif

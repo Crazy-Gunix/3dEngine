@@ -45,12 +45,13 @@ class Shader {
 
     void set_vec_3(const std::string& kName, const glm::vec3& kValue) const { 
       glUniform3fv(glGetUniformLocation(id_, kName.c_str()), 1, &kValue[0]); }
-    void set_vec_3(const std::string& kName, float x, float y, float z) const { 
+    void set_vec_3(const std::string& kName, float x, float y, float z) const {
       glUniform3f(glGetUniformLocation(id_, kName.c_str()), x, y, z); }
 
     void set_vec_4(const std::string& kName, const glm::vec4& kValue) const { 
       glUniform4fv(glGetUniformLocation(id_, kName.c_str()), 1, &kValue[0]); }
-    void set_vec_4(const std::string& kName, float x, float y, float z, float w) const { 
+    void set_vec_4(const std::string& kName, float x, float y,
+                   float z, float w) const { 
       glUniform4f(glGetUniformLocation(id_, kName.c_str()), x, y, z, w); }
 
     void set_mat_2(const std::string& kName, const glm::mat2 &kMat) const { 

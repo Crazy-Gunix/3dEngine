@@ -45,6 +45,7 @@ add_executable(3dEngine
   utils/load_assets.cpp
   utils/loading_screen.cpp
   utils/object_manager.cpp
+  utils/parse_json.cpp
   utils/play_audio.cpp
 )
 

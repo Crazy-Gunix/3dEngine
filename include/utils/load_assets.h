@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 bool LoadTextureFromFile(const char* kFilename, GLuint* pOutTexture,
                          int* pOutWidth, int* pOutHeight);
 
-void LoadModels(GLFWwindow* pWindow, Model models[6], Model& square_model, bool& loading_ready, bool& loading_finished, std::string path);
+void LoadModels(GLFWwindow* pWindow, Model models[6], Model& square_model,
+                bool& loading_ready, bool& loading_finished, std::string path);
 
 #endif

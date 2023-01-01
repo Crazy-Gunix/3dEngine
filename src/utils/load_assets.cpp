@@ -63,7 +63,9 @@ bool LoadTextureFromFile(const char* kFilename, GLuint* pOutTexture,
   return true;
 }
 
-void LoadModels(GLFWwindow* pWindow, Model models[6], Model& square_model, bool& loading_ready, bool& loading_finished, std::string path) {
+void LoadModels(GLFWwindow* pWindow, Model models[6], Model& square_model,
+                bool& loading_ready, bool& loading_finished,
+                std::string path) {
   while (!loading_ready); // Wait until the splash screen is displayed.
   glfwMakeContextCurrent(pWindow);
   stbi_set_flip_vertically_on_load(true);
