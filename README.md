@@ -3,7 +3,8 @@
 It currently works on GNU/Linux, and possibly works on MacOS and Windows, but not tested.
 
 ## Setup
-As of now, the assets to this project are currently proprietary, but in the future it might be added to this repository. For now, you will have to use your own assets.
+> As of now, the assets to this project are currently proprietary, but in the future it might be added to this repository. For now, you will have to use your own assets.
+
 If you are using GNU/Linux or MacOS, you can run the build script provided via `./build`. The build script will then compile the dependencies and the program, which might take a while.
   
 If you are on Windows, you can use CMake Gui to configure the build, and then you can build it manually.
