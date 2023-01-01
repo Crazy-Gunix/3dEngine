@@ -122,7 +122,9 @@ def SetupAppDir():
   Path(f"{app_dir}/usr/lib").mkdir()
 
   copytree("shaders/", f"{app_dir}/shaders/")
-  copytree("assets/", f"{app_dir}/assets/")
+  try:
+    copytree("assets/", f"{app_dir}/assets/")
+  except: pass
 
   copy(f"config/{app_name}.desktop", f"{app_dir}/{app_name}.desktop")
   copy(f"config/face.png", f"{app_dir}/{app_name}-512x512.png")
