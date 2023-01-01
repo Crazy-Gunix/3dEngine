@@ -29,5 +29,5 @@ jobs:
       - name: Run a multi-line script
         run: |
           sudo apt-get update -y
-          sudo apt-get install xorg-dev ninja-build -y
+          sudo apt-get install xorg-dev ninja-build p7zip-full fuse3 -y
           ./build
