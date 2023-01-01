@@ -340,4 +340,4 @@ Please make sure to update tests as appropriate.
 </details>
 
 ## License
-[Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
+This project's code is licensed under the [GPL-3.0](https://choosealicense.com/licenses/gpl-3.0/) license.
