@@ -36,6 +36,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utils/load_assets.h>
 #include <utils/loading_screen.h>
 #include <utils/object_manager.h>
+#include <utils/parse_json.h>
 #include <version.h>
 
 #define SCR_WIDTH  800
@@ -107,7 +108,8 @@ int main(int argc, char** argv) {
                   (int)(pMode->height / 2) - (int)(SCR_HEIGHT / 2));
 
   images[0].pixels = stbi_load(
-    (path + "/assets/textures/awesomeface.png").c_str(),
+    (path + "/" + ReadJsonFile(path + 
+    "/assets/textures/textures.json")["textures"]["face"].asString()).c_str(),
     &images[0].width, &images[0].height, 0, 4
   );
 
@@ -158,7 +160,8 @@ int main(int argc, char** argv) {
   lua_script_handler.AddScript("scripts/hello.lua");
 
   glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  PlayMusic(path + "/assets/sounds/music/music.ogg", true);
+  PlayMusic(path + "/" + ReadJsonFile(path + 
+            "/assets/sounds/sounds.json")["sounds"]["music"].asString(), true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE); glCullFace(GL_BACK);  glFrontFace(GL_CCW);
   while (!glfwWindowShouldClose(pWindow)) {
@@ -248,7 +251,8 @@ void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
   }
 
   if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
-    PlaySound(path + "/assets/sounds/random/untitled.ogg");
+    PlaySound(path + "/" + ReadJsonFile(path
+    + "/assets/sounds/sounds.json")["sounds"]["random_sound_test"].asString());
 
   if (key == GLFW_KEY_F5 && action == GLFW_PRESS && pause_menu_active)
     cheat_menu_active=!cheat_menu_active;
