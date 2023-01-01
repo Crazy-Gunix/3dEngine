@@ -5,9 +5,16 @@ It currently works on GNU/Linux, and possibly works on MacOS and Windows, but no
 ## Setup
 > As of now, the assets to this project are currently proprietary, but in the future it might be added to this repository. For now, you will have to use your own assets.
 
-If you are using GNU/Linux or MacOS, you can run the build script provided via `./build`. The build script will then compile the dependencies and the program, which might take a while.
+If you are on GNU/Linux, make sure you have the following dependencies installed:
+- build-essential
+- ninja-build (recommended)
+- xorg-dev
+- libfuse2
+- cmake
+
+On GNU/Linux and MacOS, you can run the build script provided via `./build`. The build script will then compile the dependencies and the program, which might take a while.
   
-If you are on Windows, you can use CMake Gui to configure the build, and then you can build it manually.
+If you are on Windows, you can use CMake GUI to configure the build, and then you can build it manually.
   
 If you are on GNU/Linux, the build script would have packaged the program and resources into an AppImage.
 ## Usage
