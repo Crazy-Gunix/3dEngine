@@ -8,10 +8,11 @@ It currently works on GNU/Linux, and possibly works on MacOS and Windows, but no
 If you are on GNU/Linux, make sure you have the following dependencies installed:
 - build-essential
 - ninja-build (recommended)
-- libogg-dev
 - xorg-dev
 - libfuse2
 - cmake
+
+Also make sure that the submodules in this project have their required dependencies installed.
 
 On GNU/Linux and MacOS, you can run the build script provided via `./build`. The build script will then compile the dependencies and the program, which might take a while.
   
