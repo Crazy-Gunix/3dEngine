@@ -25,12 +25,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <audio/sound_device.h>
 #include <graphics/camera.h>
 #include <graphics/model.h>
+#include <graphics/window.h>
 #include <menus/cheat_menu.h>
 #include <menus/debug_menu.h>
 #include <menus/help_menu.h>
 #include <menus/pause_menu.h>
-#include <misc/clear.h>
-#include <misc/error_exit.h>
 #include <scripting/lua_script_handler.h>
 #include <utils/play_audio.h>
 #include <utils/load_assets.h>
@@ -63,17 +62,16 @@ float delta_time, last_frame = 0.0f;
 
 
 
-void FramebufferSizeCallback(GLFWwindow* pWindow, int width, int height);
 void MouseCallback(GLFWwindow* pWindow, double x_pos_in, double y_pos_in);
 void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
                                       int action, int mods);
 void ProcessInput(GLFWwindow* pWindow);
 void UpdateDelta();
-void DrawPauseMenu(GLFWwindow* pWindow, ObjectManager* pObjectManager,
+void DrawPauseMenu(Window& window, ObjectManager* pObjectManager,
                    ImGuiIO& imgui_io, PauseMenu& pause_menu,
                    CheatMenu& cheat_menu);
 void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu);
-void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io, HelpMenu& help_menu);
+void DrawHelpMenu(Window& window, ImGuiIO& imgui_io, HelpMenu& help_menu);
 void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager, Shader& model_shader);
 void ConfigImGui(GLFWwindow* pWindow, ImGuiIO& imgui_io);
 
@@ -88,23 +86,17 @@ int main(int argc, char** argv) {
 
   path=(argc==1) ? "." : argv[1];
 
-  if (!glfwInit()) return EXIT_FAILURE;
-
-  glfwWindowHint(GLFW_SAMPLES, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-  GLFWwindow*pWindow=glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, 
-                                      "3D Engine", NULL, NULL);
-  if (pWindow==NULL) ErrorExit("Failed to create GLFW window.");
+  Window window(SCR_WIDTH, SCR_HEIGHT, "3D Engine");
+  window.set_cursor_pos_callback(MouseCallback);
+  window.set_key_callback(KeyCallback);
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& imgui_io = ImGui::GetIO(); (void)imgui_io;
+  ConfigImGui(window.get_window(), imgui_io);
 
   const GLFWvidmode* pMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-  glfwSetWindowPos(pWindow,(int)(pMode->width / 2) - (int)(SCR_WIDTH / 2),
+  glfwSetWindowPos(window.get_window(),
+                  (int)(pMode->width / 2) - (int)(SCR_WIDTH / 2),
                   (int)(pMode->height / 2) - (int)(SCR_HEIGHT / 2));
 
   images[0].pixels = stbi_load(
@@ -113,18 +105,7 @@ int main(int argc, char** argv) {
     &images[0].width, &images[0].height, 0, 4
   );
 
-  glfwMakeContextCurrent(pWindow);
-  glfwSwapInterval(1);
-  glfwSetFramebufferSizeCallback(pWindow, FramebufferSizeCallback);
-  glfwSetKeyCallback(pWindow, KeyCallback);
-  glfwSetCursorPosCallback(pWindow, MouseCallback);
-  // glfwSetScrollCallback(pWindow, ScrollCallback);
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    ErrorExit("Failed to initialize GLAD.");
 
-  IMGUI_CHECKVERSION(); ImGui::CreateContext();
-  ImGuiIO& imgui_io = ImGui::GetIO(); (void)imgui_io;
-  ConfigImGui(pWindow, imgui_io);
 
   SoundDevice* pSoundDevice = SoundDevice::get();
 
@@ -134,63 +115,64 @@ int main(int argc, char** argv) {
   Shader model_shader((path + "/shaders/model.vs").c_str(),
                       (path + "/shaders/model.fs").c_str());
   std::thread loading_thread(LoadModels,
-                             std::ref(pWindow), std::ref(models),
+                             window.get_window(), std::ref(models),
                              std::ref(square_model), std::ref(loading_ready),
                              std::ref(loading_finished), path
   );
-  LoadingScreen loading_screen(pWindow, path);
-  loading_screen.Render(images, imgui_io, loading_ready, loading_finished,
-                        SCR_WIDTH, SCR_HEIGHT, "Loading...");
+  LoadingScreen loading_screen(path);
+  loading_screen.Render(images, window, imgui_io, loading_ready,
+                        loading_finished, SCR_WIDTH, SCR_HEIGHT, "Loading...");
   loading_thread.join();
-  glfwMakeContextCurrent(pWindow);
-  loading_screen.Render(images, imgui_io, loading_ready, loading_finished,
-                        SCR_WIDTH, SCR_HEIGHT, "Loading Complete.");
+  glfwMakeContextCurrent(window.get_window());
+  loading_screen.Render(images, window, imgui_io, loading_ready,
+                        loading_finished, SCR_WIDTH, SCR_HEIGHT, "Loading Complete.");
   std::cout << "-------------------------\n"
             << "Loading complete.\n";
 
   ObjectManager* pObjectManager = new ObjectManager();
 
   CheatMenu cheat_menu;
-  DebugMenu debug_menu(pWindow);
-  glfwMakeContextCurrent(pWindow);
+  DebugMenu debug_menu(window.get_window());
+  glfwMakeContextCurrent(window.get_window());
   HelpMenu help_menu;
   PauseMenu pause_menu;
 
   LuaScriptHandler lua_script_handler(pObjectManager);
   lua_script_handler.AddScript("scripts/hello.lua");
 
-  glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window.get_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   PlayMusic(path + "/" + ReadJsonFile(path + 
             "/assets/sounds/sounds.json")["sounds"]["music"].asString(), true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE); glCullFace(GL_BACK);  glFrontFace(GL_CCW);
-  while (!glfwWindowShouldClose(pWindow)) {
+  while (window.IsOpen()) {
     if (pause_menu_active) { // Pause Menu
-      DrawPauseMenu(pWindow, pObjectManager, imgui_io, pause_menu, cheat_menu);
+      DrawPauseMenu(window, pObjectManager,
+                    imgui_io, pause_menu, cheat_menu);
       continue;
     } else if (help_menu_active) {
-      DrawHelpMenu(pWindow, imgui_io, help_menu);
+      DrawHelpMenu(window, imgui_io, help_menu);
       continue;
     } // Game
 
     glPolygonMode(GL_FRONT_AND_BACK, ((!wireframe_mode) ? GL_FILL : GL_LINE));
-    glfwSetWindowIcon(pWindow, 1, images);
+    glfwSetWindowIcon(window.get_window(), 1, images);
 
     UpdateDelta();
-    ProcessInput(pWindow);
+    ProcessInput(window.get_window());
 
-    ClearScreen(0.5f, 0.8f, 0.9f);
+    window.Clear(0.5f, 0.8f, 0.9f);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    DrawModels(pWindow, pObjectManager, model_shader);
+    DrawModels(window.get_window(), pObjectManager, model_shader);
 
     if (debug_mode)
-      DrawDebugMenu(pWindow, debug_menu);
+      DrawDebugMenu(window.get_window(), debug_menu);
     if (cheat_menu_active)
-      cheat_menu.Render(pWindow, camera, pObjectManager,
+      cheat_menu.Render(window.get_window(), camera, pObjectManager,
                         cheat_menu_active, pause_menu_active);
 
     lua_script_handler.RunUpdateFuncs(delta_time);
@@ -204,26 +186,18 @@ int main(int argc, char** argv) {
       glfwMakeContextCurrent(pBackupCurrentContext);
     }
 
-    glfwSwapBuffers(pWindow);
-    glfwPollEvents();
+    window.Render();
+    window.PollEvents();
   }
 
   delete pObjectManager;
   stbi_image_free(images[0].pixels);
 
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-
-  glfwTerminate();
   return EXIT_SUCCESS;
 }
 
 
 
-void FramebufferSizeCallback(GLFWwindow* pWindow, int width, int height) {
-  glViewport(0, 0, width, height);
-}
 void MouseCallback(GLFWwindow* pWindow, double x_pos_in, double y_pos_in) {
   float x_pos = static_cast<float>(x_pos_in);
   float y_pos = static_cast<float>(y_pos_in);
@@ -287,20 +261,21 @@ void UpdateDelta() {
   last_frame = current_frame;
 }
 
-void DrawPauseMenu(GLFWwindow* pWindow, ObjectManager* pObjectManager,
+void DrawPauseMenu(Window& window, ObjectManager* pObjectManager,
                    ImGuiIO& imgui_io, PauseMenu& pause_menu, 
                    CheatMenu& cheat_menu) {
   UpdateDelta();
-  ClearScreen(0.1f, 0.15f, 0.15f);
+  window.Clear(0.1f, 0.15f, 0.15f);
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  pause_menu.Render(pWindow, pause_menu_active, SCR_WIDTH, SCR_HEIGHT);
+  pause_menu.Render(window.get_window(), pause_menu_active,
+                    SCR_WIDTH, SCR_HEIGHT);
 
   if (cheat_menu_active)
-    cheat_menu.Render(pWindow, camera, pObjectManager,
+    cheat_menu.Render(window.get_window(), camera, pObjectManager,
                       cheat_menu_active, pause_menu_active);
 
   ImGui::Render();
@@ -311,10 +286,11 @@ void DrawPauseMenu(GLFWwindow* pWindow, ObjectManager* pObjectManager,
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(pBackupCurrentContext);
   }
-  glfwSetWindowIcon(pWindow, 1, images);
 
-  glfwSwapBuffers(pWindow);
-  glfwPollEvents();
+  glfwSetWindowIcon(window.get_window(), 1, images);
+
+  window.Render();
+  window.PollEvents();
 }
 void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu) {
   int window_x, window_y;
@@ -326,16 +302,16 @@ void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu) {
 
   debug_menu.Render(text_pos, pos, fps);
 }
-void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io,
+void DrawHelpMenu(Window& window, ImGuiIO& imgui_io,
                   HelpMenu& help_menu) {
   UpdateDelta();
-  ClearScreen(0.0f, 0.0f, 0.0f);
+  window.Clear(0.0f, 0.0f, 0.0f);
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  help_menu.Render(pWindow, help_menu_active, SCR_WIDTH, SCR_HEIGHT);
+  help_menu.Render(window.get_window(), help_menu_active, SCR_WIDTH, SCR_HEIGHT);
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -346,8 +322,8 @@ void DrawHelpMenu(GLFWwindow* pWindow, ImGuiIO& imgui_io,
     glfwMakeContextCurrent(pBackupCurrentContext);
   }
 
-  glfwSwapBuffers(pWindow);
-  glfwPollEvents();
+  window.Render();
+  window.PollEvents();
 }
 void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager,
                 Shader& model_shader) {

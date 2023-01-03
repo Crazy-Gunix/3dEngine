@@ -24,15 +24,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 
+#include <graphics/window.h>
+
 class LoadingScreen{
   public:
-    LoadingScreen(GLFWwindow* pWindow, std::string path);
+    LoadingScreen(std::string path);
 
-    void Render(GLFWimage* image, ImGuiIO& imgui_io, bool& loading_ready,
-                bool& loading_finished, const int kScrWidth,
-                const int kScrHeight, std::string message);
+    void Render(GLFWimage* image, Window& window, ImGuiIO& imgui_io,
+                bool& loading_ready, bool& loading_finished,
+                const int kScrWidth, const int kScrHeight,
+                std::string message);
   private:
-    GLFWwindow* pWindow_;
     std::string path_;
 };
 

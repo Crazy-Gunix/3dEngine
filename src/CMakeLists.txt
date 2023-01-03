@@ -15,33 +15,30 @@
 add_executable(3dEngine
   main.cpp
 
-  # Audio
+  ## Audio
   audio/sound_device.cpp
   audio/sound_buffer.cpp
   audio/sound_source.cpp
   audio/music_buffer.cpp
 
-  # Graphics
+  ## Graphics
   graphics/shader.cpp
   graphics/camera.cpp
   graphics/mesh.cpp
   graphics/model.cpp
+  graphics/window.cpp
 
-  ## Menus
+  # Menus
   menus/cheat_menu.cpp
   menus/debug_menu.cpp
   menus/help_menu.cpp
   menus/pause_menu.cpp
 
-  # Misc
-  misc/clear.cpp
-  misc/error_exit.cpp
-
-  # Scripting
+  ## Scripting
   scripting/lua_script_handler.cpp
   scripting/lua_bind_functions.cpp
 
-  # Utils
+  ## Utils
   utils/load_assets.cpp
   utils/loading_screen.cpp
   utils/object_manager.cpp

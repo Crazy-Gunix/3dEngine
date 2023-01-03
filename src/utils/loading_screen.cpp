@@ -23,21 +23,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <imgui_impl_opengl3.h>
 #include <stb_image.h>
 
-#include <misc/clear.h>
 #include <utils/load_assets.h>
 
-LoadingScreen::LoadingScreen(GLFWwindow* pWindow, std::string path) {
-  pWindow_ = pWindow;
+LoadingScreen::LoadingScreen(std::string path) {
   path_ = path;
 }
 
-void LoadingScreen::Render(GLFWimage* image, ImGuiIO& imgui_io,
+void LoadingScreen::Render(GLFWimage* image, Window& window, ImGuiIO& imgui_io,
                            bool& loading_ready, bool& loading_finished,
                            const int kScrWidth, const int kScrHeight,
                            std::string message) {
   for (int i = 0; i < 2; i++) {
-    glfwSetInputMode(pWindow_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    ClearScreen(0.1f, 0.15f, 0.15f);
+    glfwSetInputMode(window.get_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    window.Clear(0.1f, 0.15f, 0.15f);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -46,7 +44,7 @@ void LoadingScreen::Render(GLFWimage* image, ImGuiIO& imgui_io,
 
 
     int window_x, window_y;
-    glfwGetWindowPos(pWindow_, &window_x, &window_y);
+    glfwGetWindowPos(window.get_window(), &window_x, &window_y);
 
     std::string img_path = path_ + "/assets/textures/awesomeface.png";
 
@@ -99,11 +97,9 @@ void LoadingScreen::Render(GLFWimage* image, ImGuiIO& imgui_io,
       ImGui::RenderPlatformWindowsDefault();
       glfwMakeContextCurrent(pBackupCurrentContext);
     }
-    glfwSetWindowIcon(pWindow_, 1, image);
 
-    glfwMakeContextCurrent(pWindow_);
-    glfwSwapBuffers(pWindow_);
-    glfwPollEvents();
+    window.Render();
+    window.PollEvents();
   }
   loading_ready = true;
   while (!loading_finished); // Wait until models finish loading.
