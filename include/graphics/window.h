@@ -36,6 +36,7 @@ class Window {
     // Setters/Getters
     GLFWwindow* get_window() { return window_; }
     std::string get_title() { return title_; }
+    float get_delta_time() { return delta_time_; }
     
     void set_title(std::string title);
     void set_key_callback(void (*key_callback)(GLFWwindow*, int, int, int, int));
@@ -50,6 +51,7 @@ class Window {
     // Events
     void PollEvents() { glfwPollEvents(); }
     void Close() { glfwSetWindowShouldClose(window_, GLFW_TRUE); }
+    void UpdateDelta();
 
     // Rendering
     void Clear(float r, float g, float b, float a = 1.0f);
@@ -58,6 +60,8 @@ class Window {
     GLFWwindow* window_;
     std::string title_;
     const int width_, height_;
+    float delta_time_;
+    float last_frame_;
 
     void InitOpenGL();
 };

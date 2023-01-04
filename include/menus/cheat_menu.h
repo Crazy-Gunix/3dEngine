@@ -36,9 +36,17 @@ class CheatMenu {
     char tp_buf_y_[8] = "0";
     char tp_buf_z_[8] = "0";
 
-    char obj_buf_x_[8] = "0";
-    char obj_buf_y_[8] = "0";
-    char obj_buf_z_[8] = "0";
+    char obj_buf_pos_x_[8] = "0";
+    char obj_buf_pos_y_[8] = "0";
+    char obj_buf_pos_z_[8] = "0";
+
+    char obj_buf_rot_x_[8] = "0";
+    char obj_buf_rot_y_[8] = "0";
+    char obj_buf_rot_z_[8] = "0";
+
+    char obj_buf_scale_x_[8] = "1";
+    char obj_buf_scale_y_[8] = "1";
+    char obj_buf_scale_z_[8] = "1";
 };
 
 #endif

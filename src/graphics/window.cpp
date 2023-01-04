@@ -56,6 +56,12 @@ void Window::set_cursor_pos_callback(void (*cursor_pos_callback)
   glfwSetCursorPosCallback(window_, cursor_pos_callback);
 }
 
+void Window::UpdateDelta() {
+  float current_frame = static_cast<float>(glfwGetTime());
+  delta_time_ = current_frame - last_frame_;
+  last_frame_ = current_frame;
+}
+
 void Window::Clear(float r, float g, float b, float a) {
   glClearColor(r, g, b, a);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

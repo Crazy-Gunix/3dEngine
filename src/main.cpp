@@ -43,7 +43,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 bool debug_mode, wireframe_mode = false;
 bool pause_menu_active, cheat_menu_active, help_menu_active = false;
-
 bool loading_ready, loading_finished = false;
 
 GLFWimage images[1];
@@ -51,28 +50,21 @@ Model models[6];
 Model square_model;
 std::string path;
 
-// Camera
 Camera camera(glm::vec3(0.0f, 0.25f, 3.0f));
 float last_x = SCR_WIDTH / 2.0f;
 float last_y = SCR_WIDTH / 2.0f;
 bool first_mouse = true;
 
-// Delta
-float delta_time, last_frame = 0.0f;
-
-
-
 void MouseCallback(GLFWwindow* pWindow, double x_pos_in, double y_pos_in);
 void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
                                       int action, int mods);
-void ProcessInput(GLFWwindow* pWindow);
-void UpdateDelta();
+void ProcessInput(Window& pWindow);
 void DrawPauseMenu(Window& window, ObjectManager* pObjectManager,
                    ImGuiIO& imgui_io, PauseMenu& pause_menu,
                    CheatMenu& cheat_menu);
-void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu);
+void DrawDebugMenu(Window& pWindow, DebugMenu& debug_menu);
 void DrawHelpMenu(Window& window, ImGuiIO& imgui_io, HelpMenu& help_menu);
-void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager, Shader& model_shader);
+void DrawModels(Window& window, ObjectManager* pObjectManager, Shader& model_shader);
 void ConfigImGui(GLFWwindow* pWindow, ImGuiIO& imgui_io);
 
 
@@ -83,7 +75,6 @@ int main(int argc, char** argv) {
                                     << ENGINE_VERSION_PATCH << ' ' 
                                     << ENGINE_VERSION_PHASE << '\n';
   std::cout << "-------------------------\n";
-
   path=(argc==1) ? "." : argv[1];
 
   Window window(SCR_WIDTH, SCR_HEIGHT, "3D Engine");
@@ -105,13 +96,9 @@ int main(int argc, char** argv) {
     &images[0].width, &images[0].height, 0, 4
   );
 
-
-
   SoundDevice* pSoundDevice = SoundDevice::get();
 
-  std::cout << "-------------------------\n"
-            << "Loading assets...\n"
-            << "-------------------------\n";
+  std::cout << "-----------------\nLoading assets...\n-----------------\n";
   Shader model_shader((path + "/shaders/model.vs").c_str(),
                       (path + "/shaders/model.fs").c_str());
   std::thread loading_thread(LoadModels,
@@ -126,8 +113,7 @@ int main(int argc, char** argv) {
   glfwMakeContextCurrent(window.get_window());
   loading_screen.Render(images, window, imgui_io, loading_ready,
                         loading_finished, SCR_WIDTH, SCR_HEIGHT, "Loading Complete.");
-  std::cout << "-------------------------\n"
-            << "Loading complete.\n";
+  std::cout << "-----------------\nLoading complete.\n";
 
   ObjectManager* pObjectManager = new ObjectManager();
 
@@ -158,8 +144,8 @@ int main(int argc, char** argv) {
     glPolygonMode(GL_FRONT_AND_BACK, ((!wireframe_mode) ? GL_FILL : GL_LINE));
     glfwSetWindowIcon(window.get_window(), 1, images);
 
-    UpdateDelta();
-    ProcessInput(window.get_window());
+    window.UpdateDelta();
+    ProcessInput(window);
 
     window.Clear(0.5f, 0.8f, 0.9f);
 
@@ -167,15 +153,15 @@ int main(int argc, char** argv) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    DrawModels(window.get_window(), pObjectManager, model_shader);
+    DrawModels(window, pObjectManager, model_shader);
 
     if (debug_mode)
-      DrawDebugMenu(window.get_window(), debug_menu);
+      DrawDebugMenu(window, debug_menu);
     if (cheat_menu_active)
       cheat_menu.Render(window.get_window(), camera, pObjectManager,
                         cheat_menu_active, pause_menu_active);
 
-    lua_script_handler.RunUpdateFuncs(delta_time);
+    lua_script_handler.RunUpdateFuncs(window.get_delta_time());
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -192,7 +178,6 @@ int main(int argc, char** argv) {
 
   delete pObjectManager;
   stbi_image_free(images[0].pixels);
-
   return EXIT_SUCCESS;
 }
 
@@ -227,10 +212,8 @@ void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
   if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
     PlaySound(path + "/" + ReadJsonFile(path
     + "/assets/sounds/sounds.json")["sounds"]["random_sound_test"].asString());
-
   if (key == GLFW_KEY_F5 && action == GLFW_PRESS && pause_menu_active)
     cheat_menu_active=!cheat_menu_active;
-
   if (key == GLFW_KEY_F1 && action == GLFW_PRESS && !pause_menu_active)
     help_menu_active=true;
   if (key == GLFW_KEY_F3 && action == GLFW_PRESS && !pause_menu_active)
@@ -238,42 +221,31 @@ void KeyCallback(GLFWwindow* pWindow, int key, int scancode,
   if (key == GLFW_KEY_F8 && action == GLFW_PRESS && !pause_menu_active)
     wireframe_mode=!wireframe_mode;
 }
-
-void ProcessInput(GLFWwindow* pWindow) {
-  bool zoom =glfwGetKey(pWindow, GLFW_KEY_C);
-
+void ProcessInput(Window& window) {
+  bool zoom = glfwGetKey(window.get_window(), GLFW_KEY_C);
   camera.zoom_ = (zoom) ? 30 : kZoom;
+  bool speed_boost = (glfwGetKey(window.get_window(), GLFW_KEY_R) && !zoom);
 
-  bool speed_boost=(glfwGetKey(pWindow, GLFW_KEY_R) && !zoom);
-
-  if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
-    camera.ProcessKeyboard(kForward, speed_boost, delta_time);
-  if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
-    camera.ProcessKeyboard(kBackward, speed_boost, delta_time);
-  if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
-    camera.ProcessKeyboard(kLeft, speed_boost, delta_time);
-  if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
-    camera.ProcessKeyboard(kRight, speed_boost, delta_time);
+  if (glfwGetKey(window.get_window(), GLFW_KEY_W) == GLFW_PRESS)
+    camera.ProcessKeyboard(kForward, speed_boost, window.get_delta_time());
+  if (glfwGetKey(window.get_window(), GLFW_KEY_S) == GLFW_PRESS)
+    camera.ProcessKeyboard(kBackward, speed_boost, window.get_delta_time());
+  if (glfwGetKey(window.get_window(), GLFW_KEY_A) == GLFW_PRESS)
+    camera.ProcessKeyboard(kLeft, speed_boost, window.get_delta_time());
+  if (glfwGetKey(window.get_window(), GLFW_KEY_D) == GLFW_PRESS)
+    camera.ProcessKeyboard(kRight, speed_boost, window.get_delta_time());
 }
-void UpdateDelta() {
-  float current_frame = static_cast<float>(glfwGetTime());
-  delta_time = current_frame - last_frame;
-  last_frame = current_frame;
-}
-
 void DrawPauseMenu(Window& window, ObjectManager* pObjectManager,
                    ImGuiIO& imgui_io, PauseMenu& pause_menu, 
                    CheatMenu& cheat_menu) {
-  UpdateDelta();
+  window.UpdateDelta();
   window.Clear(0.1f, 0.15f, 0.15f);
-
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
   pause_menu.Render(window.get_window(), pause_menu_active,
                     SCR_WIDTH, SCR_HEIGHT);
-
   if (cheat_menu_active)
     cheat_menu.Render(window.get_window(), camera, pObjectManager,
                       cheat_menu_active, pause_menu_active);
@@ -286,17 +258,16 @@ void DrawPauseMenu(Window& window, ObjectManager* pObjectManager,
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(pBackupCurrentContext);
   }
-
   glfwSetWindowIcon(window.get_window(), 1, images);
 
   window.Render();
   window.PollEvents();
 }
-void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu) {
+void DrawDebugMenu(Window& window, DebugMenu& debug_menu) {
   int window_x, window_y;
-  glfwGetWindowPos(pWindow, &window_x, &window_y);
+  glfwGetWindowPos(window.get_window(), &window_x, &window_y);
 
-  unsigned int fps = round(1 / delta_time);
+  unsigned int fps = round(1 / window.get_delta_time());
   glm::vec3 pos = camera.position_;
   glm::vec2 text_pos = glm::vec2((float)window_x, (float)window_y);
 
@@ -304,9 +275,8 @@ void DrawDebugMenu(GLFWwindow* pWindow, DebugMenu& debug_menu) {
 }
 void DrawHelpMenu(Window& window, ImGuiIO& imgui_io,
                   HelpMenu& help_menu) {
-  UpdateDelta();
+  window.UpdateDelta();
   window.Clear(0.0f, 0.0f, 0.0f);
-
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
@@ -321,11 +291,10 @@ void DrawHelpMenu(Window& window, ImGuiIO& imgui_io,
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(pBackupCurrentContext);
   }
-
   window.Render();
   window.PollEvents();
 }
-void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager,
+void DrawModels(Window& window, ObjectManager* pObjectManager,
                 Shader& model_shader) {
   static float rot = 0.0f;
   model_shader.Use();
@@ -362,9 +331,8 @@ void DrawModels(GLFWwindow* pWindow, ObjectManager* pObjectManager,
   model_shader.set_mat_4("model", model);
   square_model.Draw(model_shader);
 
-  rot = (rot < 360) ? rot + 0.01f : rot = 0;
+  rot = (rot < 360) ? rot + 2.5f * window.get_delta_time() : rot = 0;
 }
-
 void ConfigImGui(GLFWwindow* pWindow, ImGuiIO& imgui_io) {
   imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   imgui_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;

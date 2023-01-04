@@ -17,8 +17,8 @@ function Start()
   -- Runs on start.
   print("Hello from lua!")
 
-  object = CreateObject();
-  
+  local object = CreateObject();
+
   SetObjectType(object, OBJECT_TYPE_BACKPACK)
   SetObjectPosition(object, -4.0, 0.9, 0.0)
   SetObjectScale(object, 0.5, 0.5, 0.5);
@@ -38,7 +38,7 @@ function Start()
   SetObjectPosition(object, 2.0, 0.1, 0.0)
   SetObjectScale(object, 1.0, 1.0, 1.0)
   SpawnObject(object)
-  
+
   SetObjectType(object, OBJECT_TYPE_NOKIA)
   SetObjectPosition(object, 4.0, 0.35, 0.0)
   SetObjectScale(object, 0.15, 0.15, 0.15)

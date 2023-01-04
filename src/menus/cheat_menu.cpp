@@ -27,7 +27,7 @@ void CheatMenu::Render(GLFWwindow* pWindow, Camera& camera,
                        ObjectManager* object_manager,
                        bool& cheat_menu, bool& paused) {
   ImGui::Begin("Cheat Menu",NULL,ImGuiWindowFlags_NoSavedSettings);
-  ImGui::SetWindowSize(ImVec2(384,256));
+  ImGui::SetWindowSize(ImVec2(384, 320));
   ImGui::SliderFloat("Movement Speed", &camera.movement_speed_, 0.0f, 20.0f);
 
   ImGui::Separator();
@@ -51,9 +51,15 @@ void CheatMenu::Render(GLFWwindow* pWindow, Camera& camera,
   }
 
   ImGui::Separator();
-  ImGui::InputText("Object X", obj_buf_x_, IM_ARRAYSIZE(obj_buf_x_));
-  ImGui::InputText("Object Y", obj_buf_y_, IM_ARRAYSIZE(obj_buf_y_));
-  ImGui::InputText("Object Z", obj_buf_z_, IM_ARRAYSIZE(obj_buf_z_));
+  ImGui::InputText("Position X", obj_buf_pos_x_, IM_ARRAYSIZE(obj_buf_pos_x_));
+  ImGui::InputText("Position Y", obj_buf_pos_y_, IM_ARRAYSIZE(obj_buf_pos_y_));
+  ImGui::InputText("Position Z", obj_buf_pos_z_, IM_ARRAYSIZE(obj_buf_pos_z_));
+  ImGui::InputText("Rotation X", obj_buf_rot_x_, IM_ARRAYSIZE(obj_buf_rot_x_));
+  ImGui::InputText("Rotation Y", obj_buf_rot_y_, IM_ARRAYSIZE(obj_buf_rot_y_));
+  ImGui::InputText("Rotation Z", obj_buf_rot_z_, IM_ARRAYSIZE(obj_buf_rot_z_));
+  ImGui::InputText("Scale X", obj_buf_scale_x_, IM_ARRAYSIZE(obj_buf_scale_x_));
+  ImGui::InputText("Scale Y", obj_buf_scale_y_, IM_ARRAYSIZE(obj_buf_scale_y_));
+  ImGui::InputText("Scale Z", obj_buf_scale_z_, IM_ARRAYSIZE(obj_buf_scale_z_));
 
   const char* kItems[] = {
     "Backpack",
@@ -81,31 +87,41 @@ void CheatMenu::Render(GLFWwindow* pWindow, Camera& camera,
   if (ImGui::Button("Spawn Object")) {
     std::cout << "Spawning \"" << kCurrentItem << "\".\n";
 
-    float x = std::stof(obj_buf_x_);
-    float y = std::stof(obj_buf_y_);
-    float z = std::stof(obj_buf_z_);
+    float pos_x = std::stof(obj_buf_pos_x_);
+    float pos_y = std::stof(obj_buf_pos_y_);
+    float pos_z = std::stof(obj_buf_pos_z_);
+
+    float rot_x = std::stof(obj_buf_rot_x_);
+    float rot_y = std::stof(obj_buf_rot_y_);
+    float rot_z = std::stof(obj_buf_rot_z_);
+
+    float scale_x = std::stof(obj_buf_scale_x_);
+    float scale_y = std::stof(obj_buf_scale_y_);
+    float scale_z = std::stof(obj_buf_scale_z_);
 
     Object obj;
-    obj.position = glm::vec3(x, y, z);
+    obj.position = glm::vec3(pos_x, pos_y, pos_z);
+    obj.rotation = glm::vec3(rot_x, rot_y, rot_z);
+    obj.scale = glm::vec3(scale_x, scale_y, scale_z);
 
     bool error = false;
 
     if (kCurrentItem == "Backpack") {
       obj.type=kObjectTypeBackpack;
-      obj.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+      obj.scale *= glm::vec3(0.5f, 0.5f, 0.5f);
     } else if (kCurrentItem == "Umbrella") {
       obj.type=kObjectTypeUmbrella;
-      obj.scale = glm::vec3(0.01f, 0.01f, 0.01f);
+      obj.scale *= glm::vec3(0.01f, 0.01f, 0.01f);
     } else if (kCurrentItem == "Coffee Cup") {
       obj.type=kObjectTypeCoffeeCup;
     } else if (kCurrentItem == "Banana") {
       obj.type=kObjectTypeBanana;
     } else if (kCurrentItem == "Nokia") {
       obj.type=kObjectTypeNokia;
-      obj.scale = glm::vec3(0.15f, 0.15f, 0.15f);
+      obj.scale *= glm::vec3(0.15f, 0.15f, 0.15f);
     } else if (kCurrentItem == "Croissant") {
       obj.type=kObjectTypeCroissant;
-      obj.rotation = glm::vec3(0.0f, -90.0f, 0.0f);
+      obj.rotation *= glm::vec3(0.0f, -90.0f, 0.0f);
     } else {
       std::cerr << "Error spawning object.\n";
       error=true;
