@@ -6,11 +6,14 @@ It currently works on GNU/Linux, and possibly works on MacOS and Windows, but no
 > As of now, the assets to this project are currently proprietary, but in the future it might be added to this repository. For now, you will have to use your own assets.
 
 If you are on GNU/Linux, make sure you have the following dependencies installed:
-- build-essential
-- ninja-build (recommended)
-- xorg-dev
-- libfuse2
-- cmake
+| Debian                 | Arch              |
+|------------------------|-------------------|
+| build-essential        | build-devel       |
+| ninja-build (optional) | ninja (optional)  |
+| xorg-dev               | xorg-server-devel |
+| libfuse                | fuse              |
+| cmake                  | cmake             |
+| git                    | git               |
 
 Also make sure that the submodules in this project have their required dependencies installed.
 
