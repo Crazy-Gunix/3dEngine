@@ -3,6 +3,7 @@ build_folder/
 
 .vscode/
 assets/
+assets.*
 
 imgui.ini
 3dEngine
